@@ -17,7 +17,7 @@ from .misc import timestamp, time_string
 from .envs import create_env
 
 
-@ray.actor
+@ray.remote
 class Runner(object):
     """Actor object to start running simulation on workers.
         Gradient computation is also executed from this object."""
@@ -68,9 +68,9 @@ def train(num_workers, env_name="PongDeterministic-v3", max_steps=30000, model=N
         policy = LSTMPolicy(env.observation_space.shape, env.action_space.n, 0)
         logdir = 'results/'
 
-    agents = [Runner(env_name, i, model=model, k=k, logdir=logdir, intrinsic=intrinsic) for i in range(num_workers)]
+    agents = [Runner.remote(env_name, i, model=model, k=k, logdir=logdir, intrinsic=intrinsic) for i in range(num_workers)]
     parameters = policy.get_weights()
-    gradient_list = [agent.compute_gradient(parameters) for agent in agents]
+    gradient_list = [agent.compute_gradient.remote(parameters) for agent in agents]
     steps = 0
     obs = 0
 
@@ -81,7 +81,7 @@ def train(num_workers, env_name="PongDeterministic-v3", max_steps=30000, model=N
         parameters = policy.get_weights()
         steps += 1
         obs += info["size"]
-        gradient_list.extend([agents[info["id"]].compute_gradient(parameters)])
+        gradient_list.extend([agents[info["id"]].compute_gradient.remote(parameters)])
 
     return env, policy
 
