@@ -231,7 +231,7 @@ if __name__=="__main__":
                         num_demonstrations_eval=100,
                         ddo_max_iters=1000,
                         ddo_vq_iters=100,
-                        num_workers=20)
+                        num_workers=32)
     
     np.save(args.out, results, allow_pickle=True)
 
