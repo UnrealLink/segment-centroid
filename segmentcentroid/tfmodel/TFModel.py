@@ -381,11 +381,11 @@ class TFModel(object):
 
             batch = self.sampleBatch(X)
 
-            print("Iteration", it, np.argmax(self.fb.Q,axis=1))
-            print("cLoss 1",np.mean(self.sess.run(self.policy_networks[0]['wlprob'], batch)))
-            print("cLoss 2" , np.mean(self.sess.run(self.policy_networks[1]['wlprob'], batch)))
-            print("tLoss 1",np.mean(self.sess.run(self.transition_networks[0]['wlprob'], batch)))
-            print("tLoss 2" , np.mean(self.sess.run(self.transition_networks[1]['wlprob'], batch)))
+            # print("Iteration", it, np.argmax(self.fb.Q,axis=1))
+            # print("cLoss 1",np.mean(self.sess.run(self.policy_networks[0]['wlprob'], batch)))
+            # print("cLoss 2" , np.mean(self.sess.run(self.policy_networks[1]['wlprob'], batch)))
+            # print("tLoss 1",np.mean(self.sess.run(self.transition_networks[0]['wlprob'], batch)))
+            # print("tLoss 2" , np.mean(self.sess.run(self.transition_networks[1]['wlprob'], batch)))
 
             #for i in range(0,1000):
             self.sess.run(self.optimizer, batch)
