@@ -186,19 +186,20 @@ def atariRAMExp(env_name="SeaquestDeterministic-v3",
 
     for i in range(rounds):
         
-        print("Runnning DDO...")
-        with g.as_default():
+        if num_options is not None:
+            print("Runnning DDO...")
+            with g.as_default():
 
-            with tf.variable_scope("optimizer2"):
+                with tf.variable_scope("optimizer2"):
 
-                vq = ddo_vq_iters
-                if i > 0:
-                    vq = 0
+                    vq = ddo_vq_iters
+                    if i > 0:
+                        vq = 0
 
-                a.train(opt, trajs, ddo_max_iters, vq)
+                    a.train(opt, trajs, ddo_max_iters, vq)
 
-            weights = variables.get_weights()
-        print("Done")
+                weights = variables.get_weights()
+            print("Done")
 
         print("Training on augmented env...")
         env, policy = train(num_workers, policy=policy, env_name=env_name, model=weights, k=num_options, max_steps=steps_per_discovery)
