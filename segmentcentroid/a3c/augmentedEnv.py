@@ -95,8 +95,9 @@ class AugmentedEnv(gym.Env):
         done = self.done
         term = False
         reward = 0
+        counter = 0
 
-        while (not done):  
+        while (not done):
             l = [ self.model.evalpi(action-N, [(proc_obs, actions[j,:])])[0]  for j in range(N)]
             #self.obs, rewardl, self.done, info = self._step(np.random.choice(np.arange(0,N),p=l/np.sum(l)))
             self.obs, rewardl, self.done, info = self._step(np.argmax(l))
@@ -106,9 +107,15 @@ class AugmentedEnv(gym.Env):
             obs = self.obs
             done = self.done
 
+            counter +=1
+
             if (np.random.rand(1) > np.maximum(np.ravel(self.model.evalpsi(int(action-N), [(proc_obs, actions[1,:])])), 0.1)):
                 #print("break")
                 break
+
+            if counter > 200:
+              # some steps where taking too long due to an option not terminating
+              break
 
             #print(term)
 
