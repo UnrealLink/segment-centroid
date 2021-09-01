@@ -33,7 +33,7 @@ class AtariRAMModel(TFSeparableModel):
         w_dense_1 = tf.Variable(tf.random_normal([self.statedim[1], self.hiddenLayerSize]))
 
         # (N x 128 x 32)
-        dense_1 = tf.nn.sigmoid(tf.matmul(x, w_dense_1))
+        dense_1 = tf.nn.sigmoid(tf.tensordot(x, w_dense_1, [[2], [0]]))
 
         # (N x 1 x 32) -> (N x 32)
         pool_1 = tf.reshape(tf.reduce_sum(dense_1, 1), [-1, self.hiddenLayerSize])
@@ -52,7 +52,7 @@ class AtariRAMModel(TFSeparableModel):
 
         y = tf.nn.softmax(logit)
 
-        logprob = tf.reshape(tf.nn.softmax_cross_entropy_with_logits(logit, a), [-1,1])
+        logprob = tf.reshape(tf.nn.softmax_cross_entropy_with_logits(logits=logit, labels=a), [-1,1])
 
         wlogprob = tf.multiply(weight, logprob)
             
@@ -78,7 +78,7 @@ class AtariRAMModel(TFSeparableModel):
         w_dense_1 = tf.Variable(tf.random_normal([self.statedim[1], self.hiddenLayerSize]))
 
         # (N x 128 x 32)
-        dense_1 = tf.nn.sigmoid(tf.matmul(x, w_dense_1))
+        dense_1 = tf.nn.sigmoid(tf.tensordot(x, w_dense_1, [[2], [0]]))
 
         # (N x 1 x 32) -> (N x 32)
         pool_1 = tf.reshape(tf.reduce_sum(dense_1, 1), [-1, self.hiddenLayerSize])
@@ -97,7 +97,7 @@ class AtariRAMModel(TFSeparableModel):
 
         y = tf.nn.softmax(logit)
 
-        logprob = tf.reshape(tf.nn.softmax_cross_entropy_with_logits(logit, a), [-1,1])
+        logprob = tf.reshape(tf.nn.softmax_cross_entropy_with_logits(logits=logit, labels=a), [-1,1])
 
         wlogprob = tf.multiply(weight, logprob)
             
