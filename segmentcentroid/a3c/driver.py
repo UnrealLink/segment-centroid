@@ -57,16 +57,16 @@ class Runner(object):
         return gradient, info
 
 
-def train(num_workers, env_name="PongDeterministic-v3", max_steps=30000, model=None, k=0, policy=None, intrinsic=False):
+def train(num_workers, env_name="PongDeterministic-v3", max_steps=30000, model=None, k=0, policy=None, intrinsic=False, logdir=None):
     env = create_env(env_name, model, k, intrinsic=intrinsic)
 
     #print(env.action_space.n, env.real_action_space)
 
 
-    logdir = 'results1/'
+    logdir = 'results1/' if logdir is None else logdir + '_post_ddo'
     if policy == None:
         policy = LSTMPolicy(env.observation_space.shape, env.action_space.n, 0)
-        logdir = 'results/'
+        logdir = 'results/' if logdir is None else logdir
 
     agents = [Runner.remote(env_name, i, model=model, k=k, logdir=logdir, intrinsic=intrinsic) for i in range(num_workers)]
     parameters = policy.get_weights()

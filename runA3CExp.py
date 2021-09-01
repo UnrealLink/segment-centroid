@@ -158,7 +158,8 @@ def atariRAMExp(env_name="SeaquestDeterministic-v3",
                 num_demonstrations_eval=10,
                 ddo_max_iters=1000,
                 ddo_vq_iters=100,
-                num_workers=20):
+                num_workers=20,
+                logdir=None):
 
     g = tf.Graph()
 
@@ -180,7 +181,7 @@ def atariRAMExp(env_name="SeaquestDeterministic-v3",
 
     #initial training
     print("Initial training...")
-    env, policy = train(num_workers, env_name=env_name, model=weights, k=num_options, max_steps=inital_steps, intrinsic=False)
+    env, policy = train(num_workers, env_name=env_name, model=weights, k=num_options, max_steps=inital_steps, intrinsic=False, logdir=logdir)
     trajs,_ = collect_demonstrations(env, policy, N=num_demonstrations_train)
     print("Done")
 
@@ -202,7 +203,7 @@ def atariRAMExp(env_name="SeaquestDeterministic-v3",
             print("Done")
 
         print("Training on augmented env...")
-        env, policy = train(num_workers, policy=policy, env_name=env_name, model=weights, k=num_options, max_steps=steps_per_discovery)
+        env, policy = train(num_workers, policy=policy, env_name=env_name, model=weights, k=num_options, max_steps=steps_per_discovery, logdir=logdir)
         print('...')
         trajs, reward = collect_demonstrations(env, policy, N=num_demonstrations_eval)
         print("Done")
@@ -218,6 +219,7 @@ if __name__=="__main__":
     parser.add_argument('--initial-steps', help='number of initial training steps', default=1000000, type=int)
     parser.add_argument('--training-steps', help='number of training steps', default=4000000, type=int)
     parser.add_argument('--out', help='output name', default="results.npy", type=str)
+    parser.add_argument('--logdir', help='log (tensorboard) directory name', default="results", type=str)
 
     args = parser.parse_args()
 
@@ -231,7 +233,8 @@ if __name__=="__main__":
                         num_demonstrations_eval=100,
                         ddo_max_iters=1000,
                         ddo_vq_iters=100,
-                        num_workers=32)
+                        num_workers=32,
+                        logdir=args.logdir)
     
     np.save(args.out, results, allow_pickle=True)
 
