@@ -12,11 +12,12 @@ class AtariRAMModel(TFSeparableModel):
 
     def __init__(self,  
                  k,
-                 statedim=(128,256), 
+                 statedim=(1024,),
                  actiondim=(8,1),
                  hiddenLayerSize=32):
         
         self.hiddenLayerSize = hiddenLayerSize
+        self.K = k
         super(AtariRAMModel, self).__init__(statedim, actiondim, k, [0,0],'all')
 
 
@@ -25,30 +26,24 @@ class AtariRAMModel(TFSeparableModel):
         #ram inputs in the gym are scaled to 0,1 so don't forget to scale
 
         # (N x 128 x 256)
-        x = tf.placeholder(tf.float32, shape=[None, self.statedim[0], self.statedim[1]])
+        x = tf.placeholder(tf.float32, shape=[None, self.statedim[0]])
         a = tf.placeholder(tf.float32, shape=[None, self.actiondim[0]])
         weight = tf.placeholder(tf.float32, shape=[None, 1])
 
-        # (256 x 32)
-        w_dense_1 = tf.Variable(tf.random_normal([self.statedim[1], self.hiddenLayerSize]))
+        # W_h1 = tf.Variable(tf.random_normal([self.statedim[0], self.hiddenLayerSize]))
+        # b_1 = tf.Variable(tf.random_normal([self.hiddenLayerSize]))
+        # h1 = tf.nn.relu(tf.matmul(x, W_h1) + b_1)
 
-        # (N x 128 x 32)
-        dense_1 = tf.nn.sigmoid(tf.tensordot(x, w_dense_1, [[2], [0]]))
-
-        # (N x 1 x 32) -> (N x 32)
-        pool_1 = tf.reshape(tf.reduce_sum(dense_1, 1), [-1, self.hiddenLayerSize])
-
-        # (32 x 32)
-        w_dense_2 = tf.Variable(tf.random_normal([self.hiddenLayerSize, self.hiddenLayerSize]))
-
-        #(N x 32)
-        dense_2 = tf.nn.sigmoid(tf.matmul(pool_1, w_dense_2))
+        # W_h2 = tf.Variable(tf.random_normal([self.hiddenLayerSize, self.hiddenLayerSize]))
+        # b_2 = tf.Variable(tf.random_normal([self.hiddenLayerSize]))
+        # h2 = tf.nn.relu(tf.matmul(h1, W_h2) + b_2)
 
         # (32 x a)
-        output_w = tf.Variable(tf.random_normal([self.hiddenLayerSize, self.actiondim[0]]))
+        output_w = tf.Variable(tf.random_normal([self.statedim[0], self.actiondim[0]]))
+        output_b = tf.Variable(tf.random_normal([self.actiondim[0]]))
 
         #output
-        logit = tf.matmul(dense_2, output_w)
+        logit = tf.matmul(x, output_w) + output_b
 
         y = tf.nn.softmax(logit)
 
@@ -63,37 +58,33 @@ class AtariRAMModel(TFSeparableModel):
                     'amax': tf.argmax(y, 1),
                     'lprob': logprob,
                     'wlprob': wlogprob,
-                    'discrete': True}
+                    'discrete': True,
+                    'output_w': output_w,
+                    'output_b': output_b}
 
 
     def createTransitionNetwork(self):
         #ram inputs in the gym are scaled to 0,1 so don't forget to scale
 
         # (N x 128 x 256)
-        x = tf.placeholder(tf.float32, shape=[None, self.statedim[0], self.statedim[1]])
-        a = tf.placeholder(tf.float32, shape=[None, 1])
+        x = tf.placeholder(tf.float32, shape=[None, self.statedim[0]])
+        a = tf.placeholder(tf.float32, shape=[None, 2])
         weight = tf.placeholder(tf.float32, shape=[None, 1])
 
-        # (256 x 32)
-        w_dense_1 = tf.Variable(tf.random_normal([self.statedim[1], self.hiddenLayerSize]))
+        # W_h1 = tf.Variable(tf.random_normal([self.statedim[0], self.hiddenLayerSize]))
+        # b_1 = tf.Variable(tf.random_normal([self.hiddenLayerSize]))
+        # h1 = tf.nn.relu(tf.matmul(x, W_h1) + b_1)
 
-        # (N x 128 x 32)
-        dense_1 = tf.nn.sigmoid(tf.tensordot(x, w_dense_1, [[2], [0]]))
-
-        # (N x 1 x 32) -> (N x 32)
-        pool_1 = tf.reshape(tf.reduce_sum(dense_1, 1), [-1, self.hiddenLayerSize])
-
-        # (32 x 32)
-        w_dense_2 = tf.Variable(tf.random_normal([self.hiddenLayerSize, self.hiddenLayerSize]))
-
-        #(N x 32)
-        dense_2 = tf.nn.sigmoid(tf.matmul(pool_1, w_dense_2))
+        # W_h2 = tf.Variable(tf.random_normal([self.hiddenLayerSize, self.hiddenLayerSize]))
+        # b_2 = tf.Variable(tf.random_normal([self.hiddenLayerSize]))
+        # h2 = tf.nn.relu(tf.matmul(h1, W_h2) + b_2)
 
         # (32 x 1)
-        output_w = tf.Variable(tf.random_normal([self.hiddenLayerSize, 1]))
+        output_w = tf.Variable(tf.random_normal([self.statedim[0], 2]))
+        output_b = tf.Variable(tf.random_normal([2]))
 
         #output
-        logit = tf.matmul(dense_2, output_w)
+        logit = tf.matmul(x, output_w) + output_b
 
         y = tf.nn.softmax(logit)
 
@@ -108,7 +99,9 @@ class AtariRAMModel(TFSeparableModel):
                     'amax': tf.argmax(y, 1),
                     'lprob': logprob,
                     'wlprob': wlogprob,
-                    'discrete': True}
+                    'discrete': True,
+                    'output_w': output_w,
+                    'output_b': output_b}
 
 
 

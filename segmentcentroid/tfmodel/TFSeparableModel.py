@@ -3,6 +3,7 @@ import numpy as np
 from .TFModel import TFModel
 from segmentcentroid.inference.forwardbackward import ForwardBackward
 from tensorflow.python.client import timeline
+import torch
 
 
 class TFSeparableModel(TFModel):
@@ -91,7 +92,7 @@ class TFSeparableModel(TFModel):
 
         #print("predpi", dist)
         
-        return dist
+        return dista
             
 
     #returns a probability distribution over actions
@@ -118,5 +119,13 @@ class TFSeparableModel(TFModel):
             return dist[:,1]
 
 
-
-        
+    def save(self, path):
+        checkpoint = {}
+        for index in range(self.k):
+            output_w = self.sess.run(self.policy_networks[index]['output_w'])
+            output_b = self.sess.run(self.policy_networks[index]['output_b'])
+            checkpoint['policy_{}'.format(index)] = {'output.weight': torch.Tensor(output_w.T), 'output.bias': torch.Tensor(output_b)}
+            output_w = self.sess.run(self.transition_networks[index]['output_w'])
+            output_b = self.sess.run(self.transition_networks[index]['output_b'])
+            checkpoint['termination_{}'.format(index)] = {'output.weight': torch.Tensor(output_w.T), 'output.bias': torch.Tensor(output_b)}
+        torch.save(checkpoint, path)

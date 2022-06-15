@@ -76,8 +76,8 @@ class TFModel(object):
         """
         Saves the model to the checkpointed file
         """
-
-        self.saver.save(self.sess, self.checkpoint_file)
+        raise NotImplemented
+        # self.saver.save(self.sess, self.checkpoint_file)
 
     def evalpi(self, index, traj):
         """
@@ -372,7 +372,7 @@ class TFModel(object):
 
         if vqiterations != 0:
             self.runVectorQuantization(X, vqiterations, vqbatchsize)
-            
+
         for it in range(iterations):
 
             #if it % self.checkpoint_freq == 0:
