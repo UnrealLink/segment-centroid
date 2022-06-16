@@ -92,7 +92,7 @@ class TFSeparableModel(TFModel):
 
         #print("predpi", dist)
         
-        return dista
+        return dist
             
 
     #returns a probability distribution over actions
